@@ -31,7 +31,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-static uint32_t last_interrupt_time = 0;
+static uint32_t last_debounce_time = 0;
+static uint32_t last_prg_time = 0;
+static uint8_t dutyCycle = 0;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -98,6 +100,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if (dutyCycle < 10)
+	  {
+  	    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
+	    HAL_Delay(10 - dutyCycle);
+	  }
+	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_RESET);
+	  HAL_Delay(dutyCycle);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -108,17 +117,28 @@ int main(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-//debounce logic
-  uint32_t now = HAL_GetTick();
-  if (last_interrupt_time + 500 > now)
-  {
-	return;
-  }
-  last_interrupt_time = now;
-
   if (GPIO_Pin == GPIO_PIN_13)
   {
-    HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
+	//debounce logic
+	uint32_t now = HAL_GetTick();
+	if (now - last_debounce_time < 50)
+	{
+	 return;
+	}
+	last_debounce_time = now;
+
+	//logic to reset UI so that we start counting from zero if more than 2000ms user didn't press a button
+	if (now - last_prg_time > 2000)
+	{
+	  dutyCycle = 0;
+	}
+	dutyCycle++;
+	if (dutyCycle > 10)
+	{
+		dutyCycle = 10;
+	}
+	last_prg_time = now;
+    //HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
   }
 }
 /* USER CODE END 4 */
