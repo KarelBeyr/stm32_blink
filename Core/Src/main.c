@@ -34,6 +34,7 @@
 static uint32_t last_debounce_time = 0;
 static uint32_t last_prg_time = 0;
 static uint8_t dutyCycle = 0;
+static uint8_t pwmWidth = 20;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -100,10 +101,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (dutyCycle < 10)
+	  if (dutyCycle < pwmWidth)
 	  {
   	    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
-	    HAL_Delay(10 - dutyCycle);
+	    HAL_Delay(pwmWidth - dutyCycle);
 	  }
 	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_RESET);
 	  HAL_Delay(dutyCycle);
@@ -133,9 +134,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	  dutyCycle = 0;
 	}
 	dutyCycle++;
-	if (dutyCycle > 10)
+	if (dutyCycle > pwmWidth)
 	{
-		dutyCycle = 10;
+		dutyCycle = pwmWidth;
 	}
 	last_prg_time = now;
     //HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
