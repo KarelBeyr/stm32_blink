@@ -62,7 +62,12 @@ static void MX_USART3_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int __io_putchar(int ch) {
+  if (HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY) != HAL_OK) {
+    return -1;
+  }
+  return ch;
+}
 /* USER CODE END 0 */
 
 /**
@@ -99,7 +104,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  setbuf(stdout, NULL);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -286,11 +291,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	last_prg_time = now;
 
     // Send duty cycle over UART
-    char msg[32];
-    int len = snprintf(msg, sizeof(msg), "Duty: %d\r\n", dutyCycle);
-    HAL_UART_Transmit(&huart3, (uint8_t*)msg, len, HAL_MAX_DELAY);
-
-    //HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
+    printf("Duty %d\r\n", dutyCycle);
   }
 }
 /* USER CODE END 4 */
