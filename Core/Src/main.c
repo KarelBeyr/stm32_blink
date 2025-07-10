@@ -46,10 +46,10 @@ static uint8_t pwmWidth = 20;
 /* Private variables ---------------------------------------------------------*/
 
 UART_HandleTypeDef huart3;
-uint8_t receivedChar;
 
 /* USER CODE BEGIN PV */
-
+uint8_t receivedChar;
+volatile uint8_t uartReceivedFlag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,6 +105,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_UART_Receive_IT(&huart3, &receivedChar, 1);
   setbuf(stdout, NULL);
   /* USER CODE END 2 */
 
@@ -112,7 +113,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  /*
+
 	  if (dutyCycle < pwmWidth)
 	  {
   	    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
@@ -120,15 +121,15 @@ int main(void)
 	  }
 	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_RESET);
 	  HAL_Delay(dutyCycle);
-	  */
+
 
 	  // just to test if we can receive from huart3
-	  if (HAL_UART_Receive(&huart3, &receivedChar, 1, HAL_MAX_DELAY) == HAL_OK)
-	  {
-	    // Echo the received character
-	    //HAL_UART_Transmit(&UartHandle, &receivedChar, 1, HAL_MAX_DELAY);
-		printf("GOT %c\r\n", receivedChar);
-	  }
+//	  if (HAL_UART_Receive(&huart3, &receivedChar, 1, HAL_MAX_DELAY) == HAL_OK)
+//	  {
+//	    // Echo the received character
+//	    //HAL_UART_Transmit(&UartHandle, &receivedChar, 1, HAL_MAX_DELAY);
+//		printf("GOT %c\r\n", receivedChar);
+//	  }
 
     /* USER CODE END WHILE */
 
@@ -278,6 +279,17 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance == USART3)
+  {
+    printf("GOT %c\r\n", receivedChar);
+
+    // Start receiving the next character again
+    HAL_UART_Receive_IT(&huart3, &receivedChar, 1);
+  }
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if (GPIO_Pin == GPIO_PIN_13)
