@@ -46,6 +46,7 @@ static uint8_t pwmWidth = 20;
 /* Private variables ---------------------------------------------------------*/
 
 UART_HandleTypeDef huart3;
+uint8_t receivedChar;
 
 /* USER CODE BEGIN PV */
 
@@ -111,6 +112,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  /*
 	  if (dutyCycle < pwmWidth)
 	  {
   	    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET);
@@ -118,6 +120,16 @@ int main(void)
 	  }
 	  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_RESET);
 	  HAL_Delay(dutyCycle);
+	  */
+
+	  // just to test if we can receive from huart3
+	  if (HAL_UART_Receive(&huart3, &receivedChar, 1, HAL_MAX_DELAY) == HAL_OK)
+	  {
+	    // Echo the received character
+	    //HAL_UART_Transmit(&UartHandle, &receivedChar, 1, HAL_MAX_DELAY);
+		printf("GOT %c\r\n", receivedChar);
+	  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
